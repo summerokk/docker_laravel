@@ -1,0 +1,52 @@
+version: '3.7'
+
+volumes:
+  db:
+  redis:
+
+services:
+  nginx:
+    image: nginx:1.17
+    ports:
+      - 80:80
+    volumes:
+      - ./laravel:/var/www/laravel
+      - ./docker/nginx:/etc/nginx/conf.d/
+    depends_on:
+      - php
+  php:
+    build:
+      context: ./docker/php
+      args:
+        - WORK_DIR=/var/www/laravel
+    volumes:
+      - ./laravel:/var/www/laravel
+    depends_on:
+      - db
+  db:
+    image: postgres:12
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=test
+    volumes:
+      - db:/var/lib/postgresql/data/
+  rds:
+    image: redis:5
+    volumes:
+      - redis:/data
+  composer:
+    image: composer:1
+    volumes:
+      - ./laravel:/var/www/laravel
+    working_dir: /var/www/laravel
+  echo:
+    build: ./docker/echo
+    ports:
+      - 6001:6001
+    depends_on:
+      - rds
+  node:
+    image: node:12
+    working_dir: /var/www/laravel
+    volumes:
+      - ./laravel:/var/www/laravel
