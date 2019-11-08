@@ -1,4 +1,4 @@
-FROM node:12
+FROM node:12-alpine
 
 RUN mkdir -p /usr/src/app
 
@@ -12,4 +12,4 @@ RUN npm install
 COPY laravel-echo-server.json /usr/src/app/laravel-echo-server.json
 
 EXPOSE 3000
-CMD [ "npm", "start", "--force" ]
+CMD ["npm", "start", "--force"]

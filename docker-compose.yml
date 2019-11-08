@@ -50,3 +50,7 @@ services:
     working_dir: /var/www/laravel
     volumes:
       - ./laravel:/var/www/laravel
+  horizon:
+    build: ./docker/horizon
+    volumes:
+      - ./laravel:/var/www/laravel

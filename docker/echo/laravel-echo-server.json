@@ -1,5 +1,5 @@
 {
-	"authHost": "localhost",
+	"authHost": "laravel.test",
 	"authEndpoint": "/broadcasting/auth",
 	"clients": [],
 	"database": "redis",
