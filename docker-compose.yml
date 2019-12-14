@@ -1,7 +1,8 @@
 version: '3.7'
 
 volumes:
-  db:
+  steamprice_db_volume:
+    external: true
   redis:
 
 services:
@@ -29,7 +30,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=test
     volumes:
-      - db:/var/lib/postgresql/data/
+      - steamprice_db_volume:/var/lib/postgresql/data/
   rds:
     image: redis:5
     volumes:
@@ -42,15 +43,20 @@ services:
   echo:
     build: ./docker/echo
     ports:
-      - 6001:6001
+      - 2053:2053
     depends_on:
       - rds
-  node:
-    image: node:12
-    working_dir: /var/www/laravel
-    volumes:
-      - ./laravel:/var/www/laravel
   horizon:
     build: ./docker/horizon
     volumes:
       - ./laravel:/var/www/laravel
+  watcher:
+    image: node:12-alpine
+    command: npm run watch
+    volumes:
+      - ./laravel:/var/www/laravel
+    working_dir: /var/www/laravel
+    logging:
+      options:
+        max-size: "100M"
+        max-file: "1"
