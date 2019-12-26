@@ -2,17 +2,16 @@ version: '3.7'
 
 volumes:
   steamprice_db_volume:
-    external: true
   redis:
 
 services:
   nginx:
-    image: nginx:1.17
+    build:
+      context: ./docker/nginx
     ports:
       - 80:80
     volumes:
-      - ./laravel:/var/www/laravel
-      - ./docker/nginx:/etc/nginx/conf.d/
+      - ./laravel:/var/www/laravel:cached
     depends_on:
       - php
   php:
@@ -29,6 +28,8 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=test
+    ports:
+    - 5432:5432
     volumes:
       - steamprice_db_volume:/var/lib/postgresql/data/
   rds:
@@ -37,6 +38,7 @@ services:
       - redis:/data
   composer:
     image: composer:1
+    command: composer install --ignore-platform-reqs
     volumes:
       - ./laravel:/var/www/laravel
     working_dir: /var/www/laravel
@@ -50,9 +52,11 @@ services:
     build: ./docker/horizon
     volumes:
       - ./laravel:/var/www/laravel
+    depends_on:
+      - rds
   watcher:
     image: node:12-alpine
-    command: npm run watch
+    command: [sh, -c, "npm i && npm run watch"]
     volumes:
       - ./laravel:/var/www/laravel
     working_dir: /var/www/laravel
